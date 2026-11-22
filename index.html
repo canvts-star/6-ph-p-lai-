@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng Thí Nghiệm Di Truyền Của Menđen - 6 Phép Lai Cơ Bản</title>
+    <!-- Tải Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tải Google Fonts: Quicksand & Nunito cho chữ tròn trịa, chuẩn sư phạm -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Tải Canvas Confetti cho hiệu ứng pháo hoa ăn mừng -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Thiết lập font chữ chủ đạo */
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 50%, #fefce8 100%);
+            min-height: 100vh;
+            color: #064e3b;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .font-display {
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* Hiệu ứng lật thẻ 3D Flashcard */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.25rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Hiệu ứng rung lắc khi chọn sai */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+        }
+        .animate-shake {
+            animation: shake 0.45s ease-in-out;
+        }
+
+        /* Hiệu ứng nảy nhẹ khi chọn đúng */
+        @keyframes popIn {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop {
+            animation: popIn 0.35s ease-out;
+        }
+
+        /* Hiệu ứng sóng âm thanh khi nhân vật nói */
+        @keyframes pulseRing {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            70% { transform: scale(1.2); opacity: 0; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        .speaking-ring::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 9999px;
+            border: 3px solid #10b981;
+            animation: pulseRing 1.2s infinite;
+        }
+
+        /* Nút bấm kiểu 3D sinh động */
+        .btn-3d {
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-3d:active:not(:disabled) {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Custom scrollbar nhẹ nhàng */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ecfdf5;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6ee7b7;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #34d399;
+        }
+    </style>
+</head>
+<body class="selection:bg-emerald-200 selection:text-emerald-900">
+
+    <!-- MODAL CHÀO MỪNG & NHẬP TÊN HỌC SINH -->
+    <div id="welcomeModal" class="fixed inset-0 z-50 flex items-center justify-center bg-emerald-950/70 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-4 border-emerald-400 relative overflow-hidden animate-pop">
+            <!-- Trang trí góc -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-200 rounded-full opacity-50"></div>
+            <div class="absolute -bottom-10 -left-10 w-28 h-28 bg-emerald-200 rounded-full opacity-50"></div>
+
+            <div class="relative z-10 text-center">
+                <!-- Icon Giáo sư Menđen / Hạt đậu SVG -->
+                <div class="w-20 h-20 mx-auto bg-gradient-to-br from-emerald-400 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg mb-4 rotate-3">
+                    <span class="text-4xl">🧬</span>
+                </div>
+                <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-extrabold rounded-full uppercase tracking-wider mb-2">
+                    Sinh Học Di Truyền • Quy Luật Phân Li
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-black text-emerald-900 mb-2">
+                    Phòng Thí Nghiệm Của Menđen
+                </h1>
+                <p class="text-sm text-emerald-700 mb-5 font-medium">
+                    Chinh phục trọn vẹn <b>6 phép lai một tính trạng</b> siêu dễ nhớ cùng trợ lý phòng thí nghiệm vui tính!
+                </p>
+
+                <form id="studentForm" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-800 uppercase mb-1 ml-1">Tên nhà khoa học nhí (Họ & Tên)</label>
+                        <input type="text" id="inputName" required placeholder="Ví dụ: Minh Anh" maxlength="30"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-emerald-200 focus:border-emerald-500 focus:outline-none font-bold text-emerald-950 bg-emerald-50/50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-emerald-800 uppercase mb-1 ml-1">Lớp học</label>
+                        <input type="text" id="inputClass" required placeholder="Ví dụ: 9A1 hoặc 12A2" maxlength="15"
+                            class="w-full px-4 py-3 rounded-xl border-2 border-emerald-200 focus:border-emerald-500 focus:outline-none font-bold text-emerald-950 bg-emerald-50/50 transition">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3.5 px-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold rounded-xl text-lg btn-3d flex items-center justify-center gap-2 mt-2">
+                        <span>Vào Phòng Thí Nghiệm</span>
+                        <span>🚀</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- THANH HEADER CHÍNH -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b-2 border-emerald-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-2">
+            <!-- Logo & Tiêu đề -->
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl sm:text-2xl shadow-md">
+                    🌱
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-black text-emerald-900 leading-tight">
+                        6 Phép Lai Menđen
+                    </h1>
+                    <p class="text-[11px] sm:text-xs font-bold text-emerald-600">
+                        Quy ước: <span class="bg-emerald-100 px-1.5 py-0.5 rounded text-emerald-800">A: Trội hoàn toàn</span> &gt; <span class="bg-amber-100 px-1.5 py-0.5 rounded text-amber-800">a: Lặn</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Thông tin học sinh & Nút điều khiển âm thanh -->
+            <div class="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+                <button onclick="openEditProfile()" title="Đổi tên / lớp"
+                    class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-xs sm:text-sm font-bold text-emerald-800 transition">
+                    <span>🧑‍🔬</span>
+                    <span id="displayStudentInfo" class="max-w-[100px] sm:max-w-[160px] truncate">Học sinh</span>
+                </button>
+
+                <!-- Bộ chọn giọng đọc tiếng Việt truyền cảm -->
+                <div class="flex items-center bg-teal-50 border border-teal-200 rounded-xl px-2 py-1 gap-1" title="Chọn giọng đọc tiếng Việt">
+                    <span class="text-xs">🎙️</span>
+                    <select id="voiceSelect" onchange="onVoiceChange()"
+                        class="bg-transparent text-xs font-bold text-teal-900 focus:outline-none max-w-[115px] sm:max-w-[155px] truncate cursor-pointer">
+                        <option value="">Giọng mặc định</option>
+                    </select>
+                    <button onclick="testExpressiveVoice()" title="Nghe thử giọng đọc truyền cảm"
+                        class="px-2 py-0.5 bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-extrabold rounded-lg transition shrink-0">
+                        Nghe thử
+                    </button>
+                </div>
+
+                <!-- Nút Bật/Tắt Âm thanh & Giọng đọc -->
+                <button id="soundToggleBtn" onclick="toggleAudio()"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-500 text-amber-950 font-extrabold text-xs sm:text-sm btn-3d">
+                    <span id="soundIcon">🔊</span>
+                    <span id="soundLabel" class="hidden md:inline">Giọng nói: BẬT</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- THANH PHỤ TRỢ: LỜI NHẮN CỦA TRỢ LÝ MENĐEN -->
+        <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white py-2 px-4 shadow-inner">
+            <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div id="mascotAvatar" class="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-amber-300 text-emerald-950 flex items-center justify-center text-lg sm:text-xl shrink-0 font-bold shadow">
+                        👨‍🔬
+                    </div>
+                    <p id="mascotSpeech" class="text-xs sm:text-sm font-bold leading-snug line-clamp-2">
+                        Chào mừng em đến với vườn đậu Hà Lan! Hãy khám phá 3 chế độ học tập bên dưới nhé!
+                    </p>
+                </div>
+                <span id="voiceMoodBadge" class="hidden sm:inline-block shrink-0 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-white/20 text-white">
+                    ✨ Giọng truyền cảm
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ĐIỀU HƯỚNG 3 CHẾ ĐỘ CHƠI -->
+    <nav class="max-w-4xl mx-auto px-3 sm:px-6 pt-5 pb-2">
+        <div class="grid grid-cols-3 gap-2 sm:gap-4 bg-white/80 p-1.5 sm:p-2 rounded-2xl shadow-md border border-emerald-200">
+            <button onclick="switchTab('tab1')" id="btn-tab1"
+                class="tab-btn py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl font-extrabold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all bg-emerald-600 text-white shadow">
+                <span class="text-lg sm:text-xl">🧠</span>
+                <span>1. Ghi Nhớ Thông Minh</span>
+            </button>
+            <button onclick="switchTab('tab2')" id="btn-tab2"
+                class="tab-btn py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl font-extrabold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all text-emerald-800 hover:bg-emerald-50">
+                <span class="text-lg sm:text-xl">🧩</span>
+                <span>2. Thử Thách Ghép Cặp</span>
+            </button>
+            <button onclick="switchTab('tab3')" id="btn-tab3"
+                class="tab-btn py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl font-extrabold text-xs sm:text-base flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all text-emerald-800 hover:bg-emerald-50">
+                <span class="text-lg sm:text-xl">⚡</span>
+                <span>3. Đấu Trường Tốc Độ</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <main class="max-w-6xl mx-auto px-3 sm:px-6 py-4 pb-16">
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: BẢNG GHI NHỚ THÔNG MINH (FLASHCARD & SƠ ĐỒ MẸO)    -->
+        <!-- ========================================================= -->
+        <section id="tab1" class="tab-content space-y-6">
+            <!-- Thanh công cụ chuyển đổi kiểu xem trong Tab 1 -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-md border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-black text-emerald-900 flex items-center gap-2">
+                        <span>📚 Bí Kíp Thuộc Lòng 6 Phép Lai Trong 3 Phút</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-emerald-700 font-medium">
+                        Bấm vào từng thẻ để <b>lật xem kết quả F1</b> và nghe thầy đọc <b>mẹo ghi nhớ siêu tốc</b>!
+                    </p>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <button onclick="toggleTab1View('cards')" id="viewCardsBtn"
+                        class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 text-white shadow">
+                        🃏 Thẻ Lật Flashcard
+                    </button>
+                    <button onclick="toggleTab1View('table')" id="viewTableBtn"
+                        class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 hover:bg-emerald-200">
+                        📊 Bảng Phân Nhóm
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chế độ 1A: Lưới 6 Thẻ Flashcard 3D -->
+            <div id="tab1CardsView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Render bằng JavaScript -->
+            </div>
+
+            <!-- Chế độ 1B: Bảng Tổng Hợp Phân Nhóm Kiểu Hình (Ẩn mặc định) -->
+            <div id="tab1TableView" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl shadow-lg border-2 border-emerald-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-emerald-700 text-white text-xs sm:text-sm uppercase">
+                                    <th class="py-3.5 px-4">STT</th>
+                                    <th class="py-3.5 px-4">Phép lai (P)</th>
+                                    <th class="py-3.5 px-4">Tỉ lệ kiểu gen (F1)</th>
+                                    <th class="py-3.5 px-4">Tỉ lệ kiểu hình (F1)</th>
+                                    <th class="py-3.5 px-4">Nhóm & Mẹo nhớ</th>
+                                    <th class="py-3.5 px-4 text-center">Nghe</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody" class="divide-y divide-emerald-100 text-sm font-bold">
+                                <!-- Render bằng JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sơ đồ 4 quy tắc vàng ghi nhớ nhanh -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-emerald-50 border-2 border-emerald-400 rounded-2xl p-4">
+                        <div class="text-emerald-700 font-black text-base mb-1">1. Đồng tính trội (100% Trội)</div>
+                        <p class="text-xs text-emerald-900 font-semibold leading-relaxed">
+                            Hễ bố hoặc mẹ có kiểu gen <b>AA</b> (trội thuần chủng) thì đời con <b>100% mang tính trạng trội</b> (3 phép lai đầu: AA×AA, AA×Aa, AA×aa).
+                        </p>
+                    </div>
+                    <div class="bg-amber-50 border-2 border-amber-400 rounded-2xl p-4">
+                        <div class="text-amber-800 font-black text-base mb-1">2. Phân tính 3 : 1</div>
+                        <p class="text-xs text-amber-950 font-semibold leading-relaxed">
+                            Cả bố và mẹ đều dị hợp (<b>Aa × Aa</b>) → Kiểu gen <b>1 AA : 2 Aa : 1 aa</b> → Kiểu hình <b>3 Trội : 1 Lặn</b>.
+                        </p>
+                    </div>
+                    <div class="bg-sky-50 border-2 border-sky-400 rounded-2xl p-4">
+                        <div class="text-sky-800 font-black text-base mb-1">3. Phân tính 1 : 1 (Lai phân tích)</div>
+                        <p class="text-xs text-sky-950 font-semibold leading-relaxed">
+                            Dị hợp lai với lặn (<b>Aa × aa</b>) → Kiểu gen <b>1 Aa : 1 aa</b> → Kiểu hình <b>1 Trội : 1 Lặn</b>.
+                        </p>
+                    </div>
+                    <div class="bg-rose-50 border-2 border-rose-400 rounded-2xl p-4">
+                        <div class="text-rose-800 font-black text-base mb-1">4. Đồng tính lặn (100% Lặn)</div>
+                        <p class="text-xs text-rose-950 font-semibold leading-relaxed">
+                            Cả bố và mẹ đều lặn (<b>aa × aa</b>) → Đời con <b>100% aa</b> (100% Lặn).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: THỬ THÁCH GHÉP CẶP (NỐI P -> TLKG -> TLKH)         -->
+        <!-- ========================================================= -->
+        <section id="tab2" class="tab-content hidden space-y-5">
+            <!-- Bảng trạng thái trò chơi ghép cặp -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-md border-2 border-emerald-200 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg sm:text-xl font-black text-emerald-900">🧩 Thử Thách Ghép Bộ Ba Hoàn Hảo</h2>
+                    <p class="text-xs sm:text-sm text-emerald-700 font-medium">
+                        Bấm chọn <b>1 Phép lai (P)</b> ở cột trái, nối với <b>Tỉ lệ kiểu gen (F1)</b> ở cột giữa và <b>Tỉ lệ kiểu hình (F1)</b> ở cột phải!
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-emerald-50 border border-emerald-300 px-3.5 py-2 rounded-xl text-center">
+                        <div class="text-[10px] uppercase font-extrabold text-emerald-600">Đã ghép</div>
+                        <div id="matchProgressText" class="text-base sm:text-lg font-black text-emerald-900">0 / 6</div>
+                    </div>
+                    <div class="bg-amber-50 border border-amber-300 px-3.5 py-2 rounded-xl text-center">
+                        <div class="text-[10px] uppercase font-extrabold text-amber-600">Thời gian</div>
+                        <div id="matchTimerText" class="text-base sm:text-lg font-black text-amber-800">00:00</div>
+                    </div>
+                    <button onclick="initMatchGame()"
+                        class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-extrabold rounded-xl text-xs sm:text-sm btn-3d">
+                        🔄 Chơi lại
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khu vực 3 cột ghép nối -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <!-- Cột 1: Phép lai P -->
+                <div class="bg-white/90 rounded-2xl p-3.5 sm:p-4 border-2 border-emerald-200 shadow-sm">
+                    <div class="text-center font-black text-emerald-800 bg-emerald-100 py-2 rounded-xl mb-3 text-sm uppercase">
+                        1️⃣ Phép lai (P)
+                    </div>
+                    <div id="col-p" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Cột 2: Tỉ lệ kiểu gen F1 -->
+                <div class="bg-white/90 rounded-2xl p-3.5 sm:p-4 border-2 border-amber-200 shadow-sm">
+                    <div class="text-center font-black text-amber-800 bg-amber-100 py-2 rounded-xl mb-3 text-sm uppercase">
+                        2️⃣ Tỉ lệ kiểu gen (F1)
+                    </div>
+                    <div id="col-kg" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Cột 3: Tỉ lệ kiểu hình F1 -->
+                <div class="bg-white/90 rounded-2xl p-3.5 sm:p-4 border-2 border-sky-200 shadow-sm">
+                    <div class="text-center font-black text-sky-800 bg-sky-100 py-2 rounded-xl mb-3 text-sm uppercase">
+                        3️⃣ Tỉ lệ kiểu hình (F1)
+                    </div>
+                    <div id="col-kh" class="space-y-2.5"></div>
+                </div>
+            </div>
+
+            <!-- Khu vực hiển thị các bộ ba đã ghép thành công -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-200 shadow-sm">
+                <h3 class="text-sm font-black text-emerald-800 uppercase mb-3 flex items-center gap-2">
+                    <span>✅ Các phép lai đã giải mã thành công:</span>
+                </h3>
+                <div id="completedMatchesList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div class="col-span-full text-center text-sm text-emerald-600/70 py-4 font-semibold italic">
+                        Chưa có phép lai nào được nối. Hãy bắt đầu chọn ở 3 cột phía trên nhé!
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: ĐẤU TRƯỜNG TRẮC NGHIỆM TỐC ĐỘ (12 CÂU HỎI)           -->
+        <!-- ========================================================= -->
+        <section id="tab3" class="tab-content hidden">
+            <!-- Màn hình bắt đầu Đấu trường -->
+            <div id="quizStartScreen" class="bg-white rounded-3xl p-6 sm:p-10 text-center max-w-2xl mx-auto shadow-xl border-2 border-emerald-200">
+                <div class="w-20 h-20 mx-auto bg-amber-100 rounded-full flex items-center justify-center text-4xl mb-4 shadow-inner">
+                    🏆
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-black text-emerald-900 mb-2">
+                    Đấu Trường Trắc Nghiệm Tốc Độ
+                </h2>
+                <p class="text-sm sm:text-base text-emerald-700 font-medium mb-6">
+                    Vượt qua <b>12 câu hỏi</b> biến hóa đa chiều (từ P tìm F1, từ F1 suy ngược ra P). Giữ chuỗi trả lời đúng liên tiếp (Combo) để nhân đôi điểm thưởng!
+                </p>
+                <div class="grid grid-cols-3 gap-3 max-w-md mx-auto mb-6 text-xs sm:text-sm font-bold">
+                    <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                        <div class="text-xl mb-1">❓</div>
+                        12 Câu Hỏi
+                    </div>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        <div class="text-xl mb-1">🔥</div>
+                        Thưởng Combo
+                    </div>
+                    <div class="bg-sky-50 p-3 rounded-xl border border-sky-200">
+                        <div class="text-xl mb-1">🎖️</div>
+                        Bảng Vinh Danh
+                    </div>
+                </div>
+                <button onclick="startQuiz()"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-2xl text-lg btn-3d inline-flex items-center gap-2">
+                    <span>Bắt Đầu Thi Đấu</span>
+                    <span>⚡</span>
+                </button>
+            </div>
+
+            <!-- Màn hình đang làm bài trắc nghiệm -->
+            <div id="quizPlayScreen" class="hidden max-w-3xl mx-auto space-y-5">
+                <!-- Thanh tiến độ, điểm số & Combo -->
+                <div class="bg-white rounded-2xl p-4 shadow-md border border-emerald-200">
+                    <div class="flex items-center justify-between text-xs sm:text-sm font-extrabold mb-2">
+                        <span class="text-emerald-800">Câu <span id="quizCurrentNum" class="text-lg text-emerald-600">1</span> / 12</span>
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <span id="quizTimerBadge" class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200">
+                                ⏱️ <span id="quizTimeLeft">20</span>s
+                            </span>
+                            <span id="quizComboBadge" class="px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 hidden">
+                                🔥 Combo x<span id="quizComboCount">0</span>
+                            </span>
+                            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900">
+                                Điểm: <span id="quizScoreText" class="text-emerald-600 text-base">0</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="w-full h-3 bg-emerald-100 rounded-full overflow-hidden">
+                        <div id="quizProgressBar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300" style="width: 8.33%"></div>
+                    </div>
+                </div>
+
+                <!-- Khung câu hỏi -->
+                <div id="quizCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-lg border-2 border-emerald-200">
+                    <div class="inline-block px-3 py-1 rounded-full bg-teal-50 text-teal-700 text-xs font-extrabold uppercase mb-3 border border-teal-200" id="quizQuestionType">
+                        Dạng bài: Xác định kết quả F1
+                    </div>
+                    <h3 id="quizQuestionText" class="text-xl sm:text-2xl font-black text-emerald-950 mb-6 leading-snug">
+                        Đang tải câu hỏi...
+                    </h3>
+
+                    <!-- 4 Lựa chọn đáp án -->
+                    <div id="quizOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                        <!-- Render bằng JS -->
+                    </div>
+
+                    <!-- Giải thích nhanh sau khi chọn -->
+                    <div id="quizFeedbackBox" class="hidden mt-5 p-4 rounded-2xl border-2 text-sm font-bold">
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button id="quizNextBtn" onclick="nextQuizQuestion()"
+                            class="hidden px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl btn-3d items-center gap-2">
+                            <span>Câu tiếp theo</span>
+                            <span>➔</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Màn hình Tổng Kết & Vinh Danh -->
+            <div id="quizResultScreen" class="hidden max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-amber-400 text-center relative overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-2 bg-gradient-to-r from-emerald-400 via-amber-400 to-teal-500"></div>
+
+                <div id="resultTrophyIcon" class="text-6xl mb-3">🏆</div>
+                <span class="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full uppercase mb-2">
+                    Chứng Nhận Hoàn Thành Thử Thách
+                </span>
+                <h2 id="resultTitle" class="text-2xl sm:text-3xl font-black text-emerald-950 mb-1">
+                    Xuất Sắc Quá Em Ơi!
+                </h2>
+                <p id="resultStudentMeta" class="text-sm sm:text-base font-extrabold text-teal-700 mb-5">
+                    Học sinh: Minh Anh • Lớp: 9A1
+                </p>
+
+                <!-- Thống kê điểm số -->
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200">
+                        <div class="text-xs font-bold text-emerald-700">Số câu đúng</div>
+                        <div id="resCorrectCount" class="text-2xl font-black text-emerald-900">12/12</div>
+                    </div>
+                    <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200">
+                        <div class="text-xs font-bold text-amber-700">Tổng điểm</div>
+                        <div id="resTotalScore" class="text-2xl font-black text-amber-700">1500</div>
+                    </div>
+                    <div class="bg-orange-50 p-3.5 rounded-2xl border border-orange-200">
+                        <div class="text-xs font-bold text-orange-700">Combo cao nhất</div>
+                        <div id="resMaxCombo" class="text-2xl font-black text-orange-600">12</div>
+                    </div>
+                </div>
+
+                <p id="resComment" class="text-sm sm:text-base text-emerald-800 font-semibold bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200 mb-6">
+                </p>
+
+                <div class="flex flex-wrap justify-center gap-3">
+                    <button onclick="startQuiz()"
+                        class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl btn-3d">
+                        🔄 Thi Lại Để Phá Kỷ Lục
+                    </button>
+                    <button onclick="switchTab('tab1')"
+                        class="px-6 py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-extrabold rounded-xl btn-3d">
+                        📚 Ôn Lại Bảng Phép Lai
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        /* =========================================================================
+           1. DỮ LIỆU GỐC 6 PHÉP LAI CỦA MENĐEN
+           ========================================================================= */
+        const MENDEL_CROSSES = [
+            {
+                id: 1,
+                p: "AA × AA",
+                kg: "1 AA (1)",
+                kh: "1 Trội (1)",
+                group: "Đồng tính trội",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                cardHeaderColor: "from-emerald-500 to-teal-600",
+                tip: "Bố mẹ đều thuần chủng trội AA nên 100% con sinh ra có kiểu gen AA và kiểu hình Trội.",
+                tipSpoken: "Phép lai một: A lớn A lớn lai với A lớn A lớn. Đời con F1 thu được một trăm phần trăm A lớn A lớn, biểu hiện một trăm phần trăm tính trạng trội."
+            },
+            {
+                id: 2,
+                p: "AA × Aa",
+                kg: "1 AA : 1 Aa (1:1)",
+                kh: "1 Trội (1)",
+                group: "Đồng tính trội",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                cardHeaderColor: "from-emerald-500 to-teal-600",
+                tip: "Một bên thuần chủng AA luôn truyền alen trội A nên đời con đồng tính 100% Trội, kiểu gen chia đôi 1 AA : 1 Aa.",
+                tipSpoken: "Phép lai hai: A lớn A lớn lai với A lớn a nhỏ. Tỉ lệ kiểu gen là một A lớn A lớn chia một A lớn a nhỏ. Kiểu hình vẫn là một trăm phần trăm trội."
+            },
+            {
+                id: 3,
+                p: "AA × aa",
+                kg: "1 Aa (1)",
+                kh: "1 Trội (1)",
+                group: "Đồng tính trội",
+                badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                cardHeaderColor: "from-emerald-500 to-teal-600",
+                tip: "Bố mẹ thuần chủng tương phản (AA × aa) tạo ra F1 đồng loạt dị hợp 100% Aa và biểu hiện 100% Trội.",
+                tipSpoken: "Phép lai ba: A lớn A lớn lai với a nhỏ a nhỏ. Đời con F1 đồng loạt một trăm phần trăm dị hợp A lớn a nhỏ, biểu hiện một trăm phần trăm trội."
+            },
+            {
+                id: 4,
+                p: "Aa × Aa",
+                kg: "1/4 AA : 2/4 Aa : 1/4 aa (1:2:1)",
+                kh: "3/4 Trội : 1/4 Lặn (3:1)",
+                group: "Phân tính 3 : 1",
+                badgeColor: "bg-amber-100 text-amber-800 border-amber-300",
+                cardHeaderColor: "from-amber-500 to-orange-500",
+                tip: "Cặp bố mẹ dị hợp kinh điển! Tỉ lệ kiểu gen 1 : 2 : 1 và tỉ lệ kiểu hình phân tính 3 Trội : 1 Lặn.",
+                tipSpoken: "Phép lai bốn: A lớn a nhỏ lai với A lớn a nhỏ. Tỉ lệ kiểu gen là một A lớn A lớn, hai A lớn a nhỏ, một a nhỏ a nhỏ. Tỉ lệ kiểu hình phân tính ba trội, một lặn."
+            },
+            {
+                id: 5,
+                p: "Aa × aa",
+                kg: "1 Aa : 1 aa (1:1)",
+                kh: "1/2 Trội : 1/2 Lặn (1:1)",
+                group: "Phân tính 1 : 1",
+                badgeColor: "bg-sky-100 text-sky-800 border-sky-300",
+                cardHeaderColor: "from-sky-500 to-blue-600",
+                tip: "Phép lai phân tích cá thể dị hợp! Cả tỉ lệ kiểu gen và tỉ lệ kiểu hình đều chia đều 1 : 1.",
+                tipSpoken: "Phép lai năm: A lớn a nhỏ lai với a nhỏ a nhỏ. Đây là phép lai phân tích, cho tỉ lệ kiểu gen một A lớn a nhỏ chia một a nhỏ a nhỏ, kiểu hình một trội chia một lặn."
+            },
+            {
+                id: 6,
+                p: "aa × aa",
+                kg: "1 aa (1)",
+                kh: "1 Lặn (1)",
+                group: "Đồng tính lặn",
+                badgeColor: "bg-rose-100 text-rose-800 border-rose-300",
+                cardHeaderColor: "from-rose-500 to-pink-600",
+                tip: "Bố mẹ đều mang kiểu hình lặn (aa) nên không có alen trội A, đời con 100% aa (Đồng tính lặn).",
+                tipSpoken: "Phép lai sáu: a nhỏ a nhỏ lai với a nhỏ a nhỏ. Đời con F1 thu được một trăm phần trăm a nhỏ a nhỏ, đồng tính lặn hoàn toàn."
+            }
+        ];
+
+        /* =========================================================================
+           2. TRẠNG THÁI TOÀN CỤC & KHO CÂU THOẠI DÍ DỎM CHỐNG LẶP
+           ========================================================================= */
+        let studentName = "Bạn nhỏ";
+        let studentClass = "Sinh học";
+        let audioEnabled = true;
+
+        // Kho câu thoại phong phú chia 4 nhóm riêng biệt (18 + 12 + 16 + 18 = 64 câu độc đáo)
+        const VOICE_LINES = {
+            // 1. Khen trả lời đúng (thường - 18 câu)
+            praise: [
+                "Chuẩn không cần chỉnh! {name} nắm chắc quy luật phân li như lòng bàn tay rồi đấy!",
+                "Đỉnh của chóp! Cứ đà này thì đề thi Sinh học gặp {name} cũng phải chào thua!",
+                "Quá mượt mà! Menđen mà sống lại chắc cũng phải vỗ tay khen {name} một tràng!",
+                "Chính xác! Tỉ lệ kiểu gen với kiểu hình không làm khó được bộ não siêu việt của {name}!",
+                "Tuyệt vời ông mặt trời! {name} lớp {class} giải mã hạt đậu Hà Lan nhanh như chớp!",
+                "Hay quá đi mất! Một pha xử lý đi vào lòng người của nhà di truyền học {name}!",
+                "Đúng rồi nha! Alen trội hay alen lặn cũng phải ngoan ngoãn xếp hàng trước {name}!",
+                "Xuất sắc luôn {name} ơi! Kiến thức Sinh học của em đang ở phong độ đỉnh cao!",
+                "Quá xịn sò! Thầy phải thả triệu trái tim cho độ chính xác này của {name}!",
+                "Chuẩn đét! {name} phân tích phép lai mượt như lụa Hà Đông vậy!",
+                "Giỏi quá ta! Tốc độ tư duy của {name} nhanh hơn cả quá trình giảm phân tạo giao tử!",
+                "Rất thuyết phục! Đúng chuẩn phong thái học sinh giỏi Sinh học lớp {class}!",
+                "Bái phục, bái phục! {name} chọn đáp án nào là chắc như đinh đóng cột đáp án đó!",
+                "Tuyệt cú mèo! Hạt đậu Hà Lan trong vườn thí nghiệm đang nhảy múa chúc mừng {name} kìa!",
+                "Đỉnh thật sự! Nhìn {name} làm bài mà thầy mát lòng mát dạ quá đi thôi!",
+                "Chính xác trăm phần trăm! Không một phép lai nào có thể đánh lừa được đôi mắt tinh tường của {name}!",
+                "Ngon lành cành đào! {name} vừa ghi thêm một điểm cộng rực rỡ cho đội di truyền học!",
+                "Quá ấn tượng! Cứ giữ vững phong độ này thì điểm 10 Sinh học chắc chắn gọi tên {name}!"
+            ],
+
+            // 2. Khen Combo liên tiếp (từ 3 câu đúng liền trở lên - 12 câu)
+            combo: [
+                "Chuỗi bất bại của {name} đang bùng cháy rồi! Có ai cản nổi cao thủ di truyền này không?",
+                "Trời ơi tin được không, {name} trả lời đúng liên hoàn như một cỗ máy quét gen!",
+                "Combo rực lửa! {name} lớp {class} đang thống trị hoàn toàn phòng thí nghiệm của Menđen!",
+                "Không thể tin nổi! {name} đang bật chế độ siêu trí tuệ, đúng liên tiếp không trượt phát nào!",
+                "Quá dữ dội {name} ơi! Hào quang nhân vật chính đang tỏa sáng rực rỡ khắp vườn đậu Hà Lan!",
+                "Siêu đẳng cấp! Chuỗi chiến thắng của {name} dài hơn cả chuỗi xoắn kép A Đê Nờ rồi!",
+                "Cảnh báo, cảnh báo! Cao thủ {name} đang càn quét mọi câu hỏi với tốc độ ánh sáng!",
+                "Thật phi thường! Ngay cả giáo sư Menđen cũng phải xin chữ ký của {name} ngay lúc này!",
+                "Đúng thông nòng luôn rồi {name} ơi! Đỉnh cao phong độ là đây chứ đâu nữa!",
+                "Bùng nổ thật sự! {name} đang tạo nên một kỷ lục vô tiền khoáng hậu tại lớp {class}!",
+                "Quá xuất thần! Mọi tỉ lệ kiểu gen, kiểu hình đều quy phục dưới chân {name}!",
+                "Huyền thoại đang được viết nên bởi {name}! Tiếp tục giữ vững chuỗi bất bại này nhé!"
+            ],
+
+            // 3. Động viên khi chọn sai (16 câu nhẹ nhàng, hài hước)
+            encourage: [
+                "Suýt chút nữa thì trúng rồi {name} ơi! Hạt đậu này hơi lém lỉnh một xíu, mình soi kỹ lại kiểu gen bố mẹ nhé!",
+                "Không sao hết! Sai một li, ta ghi nhớ cả đời. Thử lại phát nữa là chuẩn ngay!",
+                "Ối, alen lặn vừa trốn kỹ quá làm {name} hơi bối rối đúng không? Bình tĩnh nhìn lại tỉ lệ nào!",
+                "Hihi, nhầm nhẹ một nhịp thôi {name} ơi! Hít một hơi thật sâu rồi chọn lại nha!",
+                "Chưa chính xác mất rồi, nhưng tinh thần xung phong của {name} vẫn xứng đáng mười điểm!",
+                "Gần đúng rồi đấy! Chỉ cần để ý xem bố mẹ tạo ra mấy loại giao tử là ra ngay kết quả!",
+                "Đừng buồn nha {name}! Ngay cả Menđen cũng từng lai hàng ngàn cây đậu mới rút ra quy luật mà!",
+                "Ôi, cú lừa của phép lai này hơi gắt đúng không? Mình cùng rút kinh nghiệm cho câu sau nhé!",
+                "Trượt nhẹ qua khe cửa hẹp rồi! {name} kiểm tra lại xem đời con có đồng tính hay phân tính nha!",
+                "Không hề gì! Mỗi lần vấp là một lần bộ não của {name} khắc sâu kiến thức hơn!",
+                "Suýt thì ghi bàn rồi {name} ơi! Căn chỉnh lại thước ngắm di truyền một chút xíu nữa thôi!",
+                "Hạt đậu này hơi tinh nghịch đấy! {name} đừng nản, cứ tự tin chinh phục tiếp nhé!",
+                "Nhầm một xíu cho vui cửa vui nhà thôi mà! Giờ thì {name} đã biết đáp án chuẩn rồi đúng không?",
+                "Bình tĩnh tự tin lên {name} ơi! Phong độ là nhất thời, đẳng cấp học sinh lớp {class} mới là mãi mãi!",
+                "Chưa chuẩn lắm, nhưng thầy tin chắc lần tới gặp lại phép lai này, {name} sẽ xử gọn trong một nốt nhạc!",
+                "Ui da, chọn nhầm nút một chút xíu thôi! Cố lên {name}, phía trước vẫn còn rất nhiều cơ hội ghi điểm!"
+            ],
+
+            // 4. Lời chúc tổng kết cuối game theo 3 mức điểm
+            summaryExcellent: [
+                "Xin chúc mừng {name} lớp {class}! Em đã chinh phục đỉnh cao di truyền học một cách ngoạn mục. Chúc em luôn giữ vững ngọn lửa đam mê và gặt hái thật nhiều điểm 10 môn Sinh học!",
+                "Thật tự hào về {name}! Em đã thuộc nằm lòng sáu phép lai kinh điển của Menđen. Chúc nhà khoa học trẻ lớp {class} luôn tự tin, tỏa sáng trong mọi kỳ thi sắp tới!",
+                "Điểm số quá rực rỡ! {name} thực sự là niềm tự hào của lớp {class}. Chúc em học thật giỏi môn Sinh và luôn tìm thấy niềm vui trong từng bài học khám phá tự nhiên!",
+                "Tuyệt đỉnh vinh quang gọi tên {name}! Với nền tảng vững chắc hôm nay, thầy tin chắc mọi bài tập quy luật di truyền đều sẽ trở nên thật nhẹ nhàng với em!",
+                "Chúc mừng tân quán quân phòng thí nghiệm {name}! Chúc em luôn thông minh, bản lĩnh và đạt thành tích cao nhất trên hành trình chinh phục tri thức Sinh học!",
+                "Một màn trình diễn điểm mười chất lượng từ {name} lớp {class}! Chúc em luôn tràn đầy năng lượng tích cực và bứt phá ngoạn mục trong học tập nhé!"
+            ],
+            summaryGood: [
+                "Chúc mừng {name} lớp {class} đã hoàn thành xuất sắc thử thách! Chỉ còn một chút xíu nữa thôi là chạm tới mức điểm tuyệt đối rồi. Chúc em học ngày càng tiến bộ và bùng nổ hơn nữa!",
+                "Thành tích rất đáng khen ngợi {name} ơi! Em đã nắm vững phần lớn bí kíp của Menđen rồi đấy. Chúc em ôn luyện thật vui và sớm chinh phục trọn vẹn điểm tối đa nhé!",
+                "Khá lắm {name} lớp {class}! Nền tảng di truyền của em đã rất chắc chắn rồi. Chúc em luôn giữ tinh thần ham học hỏi và đạt kết quả thật cao trong các bài kiểm tra Sinh học!",
+                "Một kết quả rất ấn tượng của {name}! Chỉ cần rà soát lại vài phép lai nhỏ nữa là em sẽ trở thành cao thủ bất bại. Chúc em học tập thật hăng say và hiệu quả!",
+                "Tuyệt vời {name} ơi! Em đã vượt qua thử thách một cách đầy tự tin. Chúc em luôn yêu thích môn Sinh học và gặt hái thật nhiều hoa điểm tốt!",
+                "Hoan hô {name} lớp {class}! Kiến thức của em đang tiến bộ từng ngày. Chúc em tiếp tục bứt phá để đạt đỉnh cao mới trong lần thi đấu tiếp theo nhé!"
+            ],
+            summaryEncourage: [
+                "Cảm ơn {name} lớp {class} đã nỗ lực hết mình trong phòng thí nghiệm! Vạn sự khởi đầu nan, em hãy ghé mục Ghi Nhớ Thông Minh xem lại bốn quy tắc vàng rồi quay lại bứt phá nhé. Chúc em học thật tốt!",
+                "Hoan hô tinh thần không bỏ cuộc của {name}! Bảng sáu phép lai chỉ cần nắm được mẹo đồng tính và phân tính là sẽ rất dễ nhớ. Chúc em sớm làm chủ kiến thức và đạt điểm cao môn Sinh!",
+                "Một khởi đầu đầy thú vị dành cho {name} lớp {class}! Đừng lo lắng nhé, chỉ cần lật thẻ Flashcard vài lần là em sẽ thuộc vanh vách ngay thôi. Chúc em luôn vui vẻ và tự tin học tập!",
+                "Thầy khen ngợi sự cố gắng của {name}! Mỗi lần luyện tập là một bước tiến mới. Chúc em ôn tập thật hiệu quả và tạo nên cú lội ngược dòng ngoạn mục ở lượt chơi sau!",
+                "Cố lên nhé {name} ơi! Quy luật của Menđen rất logic và gần gũi, em chỉ cần làm quen thêm một chút nữa là sẽ thấy cực kỳ dễ. Chúc em luôn giữ nụ cười tươi và học tốt môn Sinh!",
+                "Hành trình vạn dặm bắt đầu từ những bước chân đầu tiên! Thầy tin chắc với sự chăm chỉ của mình, {name} lớp {class} sẽ sớm chinh phục trọn vẹn bảng phép lai này!"
+            ]
+        };
+
+        // Bộ quản lý hàng đợi chống lặp (Deck-shuffle Queue) cho từng nhóm thoại
+        const speechQueues = {};
+
+        function getNextUniqueLine(category) {
+            const sourceList = VOICE_LINES[category];
+            if (!sourceList || sourceList.length === 0) return "";
+
+            if (!speechQueues[category] || speechQueues[category].queue.length === 0) {
+                const lastSpoken = speechQueues[category] ? speechQueues[category].lastItem : null;
+                let shuffled = shuffleArray(sourceList);
+
+                // Đảm bảo câu đầu tiên của vòng mới không trùng với câu cuối cùng của vòng cũ
+                if (lastSpoken && shuffled.length > 1 && shuffled[0] === lastSpoken) {
+                    const swapIdx = Math.floor(Math.random() * (shuffled.length - 1)) + 1;
+                    [shuffled[0], shuffled[swapIdx]] = [shuffled[swapIdx], shuffled[0]];
+                }
+
+                speechQueues[category] = {
+                    queue: shuffled,
+                    lastItem: lastSpoken
+                };
+            }
+
+            const chosen = speechQueues[category].queue.shift();
+            speechQueues[category].lastItem = chosen;
+
+            return chosen
+                .replace(/\{name\}/g, studentName)
+                .replace(/\{class\}/g, studentClass);
+        }
+
+        /* =========================================================================
+           3. HỆ THỐNG ÂM THANH (WEB AUDIO API) & GIỌNG NÓI TRUYỀN CẢM (vi-VN)
+           ========================================================================= */
+        let audioCtx = null;
+        let availableViVoices = [];
+        let selectedVoiceURI = "";
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        // Quét và ưu tiên chọn giọng tiếng Việt tự nhiên, truyền cảm nhất
+        function loadVietnameseVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const allVoices = window.speechSynthesis.getVoices();
+            if (!allVoices || allVoices.length === 0) return;
+
+            // Lọc các giọng tiếng Việt (vi-VN, vi_VN, hoặc tên có Tiếng Việt / Vietnamese)
+            const viVoices = allVoices.filter(v =>
+                v.lang.toLowerCase().includes('vi') ||
+                v.name.toLowerCase().includes('vietnam') ||
+                v.name.toLowerCase().includes('tiếng việt') ||
+                v.name.toLowerCase().includes('hoaimy') ||
+                v.name.toLowerCase().includes('namminh') ||
+                v.name.toLowerCase().includes('linh')
+            );
+
+            // Chấm điểm ưu tiên độ tự nhiên truyền cảm
+            const scoreVoice = (v) => {
+                const name = v.name.toLowerCase();
+                let score = 0;
+                if (name.includes('natural') || name.includes('online')) score += 50; // Giọng neural tự nhiên (Edge/Chrome)
+                if (name.includes('hoaimy')) score += 45; // Giọng nữ Microsoft Hoài My rất truyền cảm
+                if (name.includes('google tiếng việt') || name.includes('google vietnamese')) score += 40;
+                if (name.includes('linh')) score += 38; // Giọng nữ Apple Linh
+                if (name.includes('namminh')) score += 35; // Giọng nam Microsoft Nam Minh
+                if (v.lang.toLowerCase() === 'vi-vn') score += 20;
+                return score;
+            };
+
+            viVoices.sort((a, b) => scoreVoice(b) - scoreVoice(a));
+            availableViVoices = viVoices;
+
+            const selectEl = document.getElementById('voiceSelect');
+            if (!selectEl) return;
+
+            const prevSelection = selectedVoiceURI || selectEl.value;
+            selectEl.innerHTML = '';
+
+            if (viVoices.length > 0) {
+                viVoices.forEach((v, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = v.voiceURI;
+                    // Rút gọn tên hiển thị cho gọn gàng trên giao diện
+                    let cleanName = v.name
+                        .replace('Microsoft ', '')
+                        .replace('Online (Natural) - ', '')
+                        .replace('Vietnamese (Vietnam)', 'Tiếng Việt')
+                        .replace('Google Tiếng Việt', 'Google Nữ Truyền Cảm');
+                    if (index === 0) cleanName = `⭐ ${cleanName}`;
+                    opt.textContent = cleanName;
+                    selectEl.appendChild(opt);
+                });
+
+                if (prevSelection && viVoices.some(v => v.voiceURI === prevSelection)) {
+                    selectEl.value = prevSelection;
+                } else {
+                    selectEl.value = viVoices[0].voiceURI;
+                    selectedVoiceURI = viVoices[0].voiceURI;
+                }
+            } else {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "Tiếng Việt (Mặc định)";
+                selectEl.appendChild(opt);
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = loadVietnameseVoices;
+        }
+
+        function onVoiceChange() {
+            const selectEl = document.getElementById('voiceSelect');
+            selectedVoiceURI = selectEl.value;
+            testExpressiveVoice();
+        }
+
+        function testExpressiveVoice() {
+            if (!audioEnabled) {
+                toggleAudio();
+                return;
+            }
+            playSoundEffect('click');
+            speakVietnamese(
+                `Xin chào ${studentName}! Thầy là trợ lý phòng thí nghiệm của Menđen đây... Chúng ta cùng chinh phục bảng sáu phép lai thật vui nhé!`,
+                null,
+                'praise'
+            );
+        }
+
+        // Tạo hiệu ứng âm thanh bằng Web Audio API (không dùng URL ngoài)
+        function playSoundEffect(type) {
+            if (!audioEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+
+                if (type === 'click') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, now);
+                    osc.frequency.exponentialRampToValueAtTime(680, now + 0.07);
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.07);
+                } else if (type === 'correct') {
+                    // Tiếng ting-ting vui tươi (C5 -> E5 -> G5)
+                    const notes = [523.25, 659.25, 783.99];
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.075);
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.075);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.075 + 0.24);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.075);
+                        osc.stop(now + idx * 0.075 + 0.24);
+                    });
+                } else if (type === 'wrong') {
+                    // Tiếng boing trầm ấm nhẹ nhàng
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.exponentialRampToValueAtTime(160, now + 0.24);
+                    gain.gain.setValueAtTime(0.14, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.26);
+                } else if (type === 'win') {
+                    // Nhạc hiệu fanfare chiến thắng
+                    const melody = [523.25, 659.25, 783.99, 1046.50];
+                    melody.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+                        gain.gain.setValueAtTime(0.18, now + idx * 0.11);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.42);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(now + idx * 0.11);
+                        osc.stop(now + idx * 0.11 + 0.42);
+                    });
+                }
+            } catch (e) {
+                console.warn("Lỗi âm thanh:", e);
+            }
+        }
+
+        // Làm mượt văn bản để bộ tổng hợp giọng nói ngắt nghỉ tự nhiên, giàu cảm xúc
+        function formatTextForExpressiveSpeech(rawText) {
+            return rawText
+                .replace(/!/g, '! ... ')
+                .replace(/\?/g, '? ... ')
+                .replace(/ — /g, ', ')
+                .replace(/:/g, ', ');
+        }
+
+        // Đọc văn bản tiếng Việt truyền cảm theo sắc thái (mood: 'praise' | 'combo' | 'encourage' | 'explain')
+        function speakVietnamese(text, displayMessage = null, mood = 'explain') {
+            const speechBubble = document.getElementById('mascotSpeech');
+            const avatar = document.getElementById('mascotAvatar');
+            const moodBadge = document.getElementById('voiceMoodBadge');
+
+            const finalDisplay = displayMessage || text;
+            speechBubble.textContent = finalDisplay;
+
+            // Cập nhật biểu cảm trợ lý theo sắc thái
+            const moodConfig = {
+                praise: { icon: "🤩", label: "✨ Giọng khen ngợi", rate: 1.01, pitch: 1.08 },
+                combo: { icon: "🔥", label: "⚡ Giọng bùng nổ", rate: 1.03, pitch: 1.12 },
+                encourage: { icon: "🤗", label: "💛 Giọng động viên", rate: 0.96, pitch: 0.98 },
+                explain: { icon: "👨‍🔬", label: "📖 Giọng giảng bài", rate: 0.99, pitch: 1.02 }
+            };
+            const cfg = moodConfig[mood] || moodConfig.explain;
+            avatar.textContent = cfg.icon;
+            if (moodBadge) moodBadge.textContent = cfg.label;
+
+            if (!audioEnabled || !('speechSynthesis' in window)) return;
+
+            try {
+                window.speechSynthesis.cancel();
+                const expressiveText = formatTextForExpressiveSpeech(text);
+                const utterance = new SpeechSynthesisUtterance(expressiveText);
+                utterance.lang = 'vi-VN';
+                utterance.rate = cfg.rate;
+                utterance.pitch = cfg.pitch;
+                utterance.volume = 1.0;
+
+                // Chọn đúng giọng tiếng Việt người dùng chọn hoặc giọng ưu tiên cao nhất
+                const allVoices = window.speechSynthesis.getVoices();
+                let chosenVoice = null;
+                if (selectedVoiceURI) {
+                    chosenVoice = allVoices.find(v => v.voiceURI === selectedVoiceURI);
+                }
+                if (!chosenVoice && availableViVoices.length > 0) {
+                    chosenVoice = availableViVoices[0];
+                }
+                if (!chosenVoice) {
+                    chosenVoice = allVoices.find(v => v.lang.toLowerCase().includes('vi'));
+                }
+                if (chosenVoice) utterance.voice = chosenVoice;
+
+                utterance.onstart = () => avatar.classList.add('speaking-ring');
+                utterance.onend = () => avatar.classList.remove('speaking-ring');
+                utterance.onerror = () => avatar.classList.remove('speaking-ring');
+
+                window.speechSynthesis.speak(utterance);
+            } catch (err) {
+                console.warn("Web Speech API không khả dụng:", err);
+            }
+        }
+
+        function speakRandomPraise(comboCount = 1) {
+            if (comboCount >= 3) {
+                const msg = getNextUniqueLine('combo');
+                speakVietnamese(msg, msg, 'combo');
+            } else {
+                const msg = getNextUniqueLine('praise');
+                speakVietnamese(msg, msg, 'praise');
+            }
+        }
+
+        function speakRandomEncourage() {
+            const msg = getNextUniqueLine('encourage');
+            speakVietnamese(msg, msg, 'encourage');
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('soundIcon');
+            const label = document.getElementById('soundLabel');
+            const btn = document.getElementById('soundToggleBtn');
+
+            if (audioEnabled) {
+                icon.textContent = "🔊";
+                label.textContent = "Giọng nói: BẬT";
+                btn.classList.remove('bg-gray-300', 'text-gray-700');
+                btn.classList.add('bg-amber-400', 'text-amber-950');
+                playSoundEffect('click');
+                speakVietnamese(`Đã bật giọng nói truyền cảm rồi nha ${studentName}!`, null, 'praise');
+            } else {
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                icon.textContent = "🔇";
+                label.textContent = "Giọng nói: TẮT";
+                btn.classList.remove('bg-amber-400', 'text-amber-950');
+                btn.classList.add('bg-gray-300', 'text-gray-700');
+            }
+        }
+
+        /* =========================================================================
+           4. XỬ LÝ FORM NHẬP TÊN & CHUYỂN TAB
+           ========================================================================= */
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nameVal = document.getElementById('inputName').value.trim();
+            const classVal = document.getElementById('inputClass').value.trim();
+            if (nameVal) studentName = nameVal;
+            if (classVal) studentClass = classVal;
+
+            document.getElementById('displayStudentInfo').textContent = `${studentName} (${studentClass})`;
+            document.getElementById('welcomeModal').classList.add('hidden');
+
+            getAudioContext();
+            loadVietnameseVoices();
+            playSoundEffect('correct');
+            speakVietnamese(
+                `Chào mừng ${studentName} lớp ${studentClass} đến với phòng thí nghiệm của Menđen! Hãy chạm vào từng thẻ để khám phá sáu phép lai nhé!`,
+                null,
+                'praise'
+            );
+        });
+
+        function openEditProfile() {
+            document.getElementById('inputName').value = studentName;
+            document.getElementById('inputClass').value = studentClass;
+            document.getElementById('welcomeModal').classList.remove('hidden');
+        }
+
+        function switchTab(tabId) {
+            playSoundEffect('click');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white', 'shadow');
+                btn.classList.add('text-emerald-800', 'hover:bg-emerald-50');
+            });
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('bg-emerald-600', 'text-white', 'shadow');
+            activeBtn.classList.remove('text-emerald-800', 'hover:bg-emerald-50');
+
+            if (tabId === 'tab2' && !matchInitialized) {
+                initMatchGame();
+            }
+        }
+
+        /* =========================================================================
+           5. LOGIC TAB 1: BẢNG GHI NHỚ THÔNG MINH (FLASHCARD & BẢNG)
+           ========================================================================= */
+        function renderTab1() {
+            const cardsContainer = document.getElementById('tab1CardsView');
+            const tableBody = document.getElementById('summaryTableBody');
+
+            cardsContainer.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            MENDEL_CROSSES.forEach(item => {
+                // 1. Tạo Flashcard 3D
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = "flip-card perspective-1000 h-64 sm:h-72 cursor-pointer select-none";
+                cardWrapper.onclick = function() {
+                    this.classList.toggle('flipped');
+                    playSoundEffect('click');
+                    speakVietnamese(item.tipSpoken, `Phép lai ${item.id} (${item.p}): ${item.tip}`, 'explain');
+                };
+
+                cardWrapper.innerHTML = `
+                    <div class="flip-card-inner shadow-lg rounded-2xl">
+                        <!-- Mặt trước: Phép lai P -->
+                        <div class="flip-card-front bg-white border-2 border-emerald-200 p-5 flex flex-col justify-between">
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">
+                                    Phép lai #${item.id}
+                                </span>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-extrabold border ${item.badgeColor}">
+                                    ${item.group}
+                                </span>
+                            </div>
+
+                            <div class="text-center my-auto">
+                                <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1">Thế hệ xuất phát (P)</div>
+                                <div class="text-3xl sm:text-4xl font-black text-emerald-950 tracking-wide bg-emerald-50/80 py-3 px-4 rounded-2xl border border-emerald-200 inline-block">
+                                    ${item.p}
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-center gap-1.5 text-xs font-extrabold text-teal-600">
+                                <span>👆 Chạm để lật xem F1 & nghe giải thích</span>
+                            </div>
+                        </div>
+
+                        <!-- Mặt sau: Kết quả F1 & Mẹo nhớ -->
+                        <div class="flip-card-back bg-gradient-to-br ${item.cardHeaderColor} text-white p-5 flex flex-col justify-between shadow-xl">
+                            <div class="flex items-center justify-between border-b border-white/25 pb-2">
+                                <span class="font-black text-base">P: ${item.p}</span>
+                                <span class="text-xs font-extrabold bg-white/20 px-2.5 py-0.5 rounded-full">🔊 Đang đọc</span>
+                            </div>
+
+                            <div class="space-y-2 my-auto">
+                                <div class="bg-white/15 backdrop-blur-sm p-2.5 rounded-xl">
+                                    <div class="text-[11px] uppercase font-bold text-white/80">Tỉ lệ kiểu gen (F1):</div>
+                                    <div class="text-base sm:text-lg font-black">${item.kg}</div>
+                                </div>
+                                <div class="bg-white/15 backdrop-blur-sm p-2.5 rounded-xl">
+                                    <div class="text-[11px] uppercase font-bold text-white/80">Tỉ lệ kiểu hình (F1):</div>
+                                    <div class="text-base sm:text-lg font-black">${item.kh}</div>
+                                </div>
+                            </div>
+
+                            <p class="text-xs font-semibold bg-black/20 p-2 rounded-xl leading-snug">
+                                💡 ${item.tip}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.appendChild(cardWrapper);
+
+                // 2. Tạo dòng trong Bảng tổng hợp
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-emerald-50/80 transition cursor-pointer";
+                tr.onclick = () => {
+                    playSoundEffect('click');
+                    speakVietnamese(item.tipSpoken, `Phép lai ${item.id} (${item.p}): ${item.tip}`, 'explain');
+                };
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 text-emerald-700">#${item.id}</td>
+                    <td class="py-3.5 px-4 text-base font-black text-emerald-950 whitespace-nowrap">${item.p}</td>
+                    <td class="py-3.5 px-4 text-teal-800">${item.kg}</td>
+                    <td class="py-3.5 px-4 text-amber-800">${item.kh}</td>
+                    <td class="py-3.5 px-4">
+                        <span class="inline-block px-2.5 py-0.5 rounded-full text-xs border mb-1 ${item.badgeColor}">${item.group}</span>
+                        <div class="text-xs text-gray-600 font-medium">${item.tip}</div>
+                    </td>
+                    <td class="py-3.5 px-4 text-center">
+                        <button class="w-9 h-9 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 inline-flex items-center justify-center">
+                            🔊
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function toggleTab1View(view) {
+            playSoundEffect('click');
+            const cardsView = document.getElementById('tab1CardsView');
+            const tableView = document.getElementById('tab1TableView');
+            const btnCards = document.getElementById('viewCardsBtn');
+            const btnTable = document.getElementById('viewTableBtn');
+
+            if (view === 'cards') {
+                cardsView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                btnCards.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 text-white shadow";
+                btnTable.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 hover:bg-emerald-200";
+            } else {
+                cardsView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                btnTable.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-600 text-white shadow";
+                btnCards.className = "px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-emerald-100 text-emerald-800 hover:bg-emerald-200";
+            }
+        }
+
+        /* =========================================================================
+           6. LOGIC TAB 2: THỬ THÁCH GHÉP CẶP BỘ BA (P -> TLKG -> TLKH)
+           ========================================================================= */
+        let matchInitialized = false;
+        let selectedP = null;
+        let selectedKG = null;
+        let selectedKH = null;
+        let matchedIds = new Set();
+        let matchSeconds = 0;
+        let matchTimerInterval = null;
+
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        function initMatchGame() {
+            matchInitialized = true;
+            selectedP = null;
+            selectedKG = null;
+            selectedKH = null;
+            matchedIds.clear();
+            matchSeconds = 0;
+
+            clearInterval(matchTimerInterval);
+            document.getElementById('matchTimerText').textContent = "00:00";
+            document.getElementById('matchProgressText').textContent = "0 / 6";
+            document.getElementById('completedMatchesList').innerHTML = `
+                <div class="col-span-full text-center text-sm text-emerald-600/70 py-4 font-semibold italic">
+                    Chưa có phép lai nào được nối. Hãy bắt đầu chọn ở 3 cột phía trên nhé!
+                </div>
+            `;
+
+            matchTimerInterval = setInterval(() => {
+                matchSeconds++;
+                const mins = String(Math.floor(matchSeconds / 60)).padStart(2, '0');
+                const secs = String(matchSeconds % 60).padStart(2, '0');
+                document.getElementById('matchTimerText').textContent = `${mins}:${secs}`;
+            }, 1000);
+
+            renderMatchColumns();
+        }
+
+        function renderMatchColumns() {
+            const colP = document.getElementById('col-p');
+            const colKG = document.getElementById('col-kg');
+            const colKH = document.getElementById('col-kh');
+
+            // Xáo trộn độc lập từng cột (mỗi thẻ có id phép lai gốc để đối chiếu)
+            const listP = shuffleArray(MENDEL_CROSSES);
+            const listKG = shuffleArray(MENDEL_CROSSES);
+            const listKH = shuffleArray(MENDEL_CROSSES);
+
+            colP.innerHTML = '';
+            colKG.innerHTML = '';
+            colKH.innerHTML = '';
+
+            listP.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `match-p-${item.id}`;
+                btn.dataset.id = item.id;
+                btn.className = "match-item-p w-full py-3 px-4 rounded-xl border-2 border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100 font-black text-base text-emerald-950 transition text-center";
+                btn.textContent = `P: ${item.p}`;
+                btn.onclick = () => selectMatchItem('p', item.id, btn);
+                colP.appendChild(btn);
+            });
+
+            listKG.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `match-kg-${item.id}`;
+                btn.dataset.id = item.id;
+                btn.className = "match-item-kg w-full py-3 px-3 rounded-xl border-2 border-amber-200 bg-amber-50/50 hover:bg-amber-100 font-extrabold text-xs sm:text-sm text-amber-950 transition text-center";
+                btn.textContent = item.kg;
+                btn.onclick = () => selectMatchItem('kg', item.id, btn);
+                colKG.appendChild(btn);
+            });
+
+            listKH.forEach(item => {
+                const btn = document.createElement('button');
+                btn.id = `match-kh-${item.id}`;
+                btn.dataset.id = item.id;
+                btn.dataset.khValue = item.kh; // Cho phép khớp các phép lai cùng "100% Trội"
+                btn.className = "match-item-kh w-full py-3 px-3 rounded-xl border-2 border-sky-200 bg-sky-50/50 hover:bg-sky-100 font-extrabold text-xs sm:text-sm text-sky-950 transition text-center";
+                btn.textContent = item.kh;
+                btn.onclick = () => selectMatchItem('kh', item.id, btn);
+                colKH.appendChild(btn);
+            });
+        }
+
+        function selectMatchItem(colType, id, btnEl) {
+            if (btnEl.disabled) return;
+            playSoundEffect('click');
+
+            // Bỏ highlight cũ trong cùng cột
+            document.querySelectorAll(`.match-item-${colType}`).forEach(el => {
+                if (!el.disabled) {
+                    el.classList.remove('ring-4', 'ring-teal-500', 'bg-teal-100', 'scale-[1.02]');
+                }
+            });
+
+            // Highlight nút vừa chọn
+            btnEl.classList.add('ring-4', 'ring-teal-500', 'bg-teal-100', 'scale-[1.02]');
+
+            if (colType === 'p') selectedP = { id, el: btnEl };
+            if (colType === 'kg') selectedKG = { id, el: btnEl };
+            if (colType === 'kh') selectedKH = { id, khValue: btnEl.dataset.khValue, el: btnEl };
+
+            // Khi đã chọn đủ cả 3 cột -> Kiểm tra kết quả
+            if (selectedP && selectedKG && selectedKH) {
+                const targetCross = MENDEL_CROSSES.find(c => c.id === selectedP.id);
+                // Kiểm tra: P khớp với TLKG và giá trị TLKH khớp với phép lai P đó
+                const isCorrect = (selectedP.id === selectedKG.id) && (targetCross.kh === selectedKH.khValue);
+
+                if (isCorrect) {
+                    playSoundEffect('correct');
+                    matchedIds.add(targetCross.id);
+
+                    // Vô hiệu hóa 3 thẻ đã ghép đúng
+                    [selectedP.el, selectedKG.el, selectedKH.el].forEach(el => {
+                        el.disabled = true;
+                        el.classList.remove('ring-4', 'ring-teal-500', 'bg-teal-100', 'scale-[1.02]');
+                        el.classList.add('opacity-40', 'line-through', 'bg-gray-100', 'border-gray-300', 'cursor-not-allowed');
+                    });
+
+                    // Thêm vào danh sách đã giải mã
+                    const listContainer = document.getElementById('completedMatchesList');
+                    if (matchedIds.size === 1) listContainer.innerHTML = '';
+
+                    const badge = document.createElement('div');
+                    badge.className = "bg-emerald-50 border-2 border-emerald-400 rounded-xl p-3 animate-pop";
+                    badge.innerHTML = `
+                        <div class="font-black text-emerald-900 text-sm">P: ${targetCross.p}</div>
+                        <div class="text-xs font-bold text-teal-700 mt-0.5">KG: ${targetCross.kg}</div>
+                        <div class="text-xs font-bold text-amber-800">KH: ${targetCross.kh}</div>
+                    `;
+                    listContainer.appendChild(badge);
+
+                    document.getElementById('matchProgressText').textContent = `${matchedIds.size} / 6`;
+
+                    if (matchedIds.size === 6) {
+                        clearInterval(matchTimerInterval);
+                        playSoundEffect('win');
+                        triggerConfetti();
+                        const winLine = getNextUniqueLine('summaryExcellent');
+                        speakVietnamese(
+                            `Tuyệt vời! ${studentName} đã ghép hoàn chỉnh cả sáu phép lai chỉ trong ${matchSeconds} giây! ${winLine}`,
+                            `Hoàn thành cả 6 phép lai trong ${matchSeconds} giây! ${winLine}`,
+                            'combo'
+                        );
+                    } else {
+                        speakRandomPraise(matchedIds.size);
+                    }
+                } else {
+                    playSoundEffect('wrong');
+                    speakRandomEncourage();
+                    const els = [selectedP.el, selectedKG.el, selectedKH.el];
+                    els.forEach(el => {
+                        el.classList.add('animate-shake', 'bg-rose-100', 'border-rose-400');
+                        setTimeout(() => {
+                            el.classList.remove('animate-shake', 'bg-rose-100', 'border-rose-400', 'ring-4', 'ring-teal-500', 'bg-teal-100', 'scale-[1.02]');
+                        }, 500);
+                    });
+                }
+
+                selectedP = null;
+                selectedKG = null;
+                selectedKH = null;
+            }
+        }
+
+        /* =========================================================================
+           7. LOGIC TAB 3: ĐẤU TRƯỜNG TRẮC NGHIỆM TỐC ĐỘ (12 CÂU HỎI)
+           ========================================================================= */
+        const QUIZ_BANK = [
+            {
+                type: "Xuôi: P → Tỉ lệ kiểu gen F1",
+                q: "Phép lai P: Aa × Aa cho đời con F1 có tỉ lệ kiểu gen như thế nào?",
+                options: ["1/4 AA : 2/4 Aa : 1/4 aa (1:2:1)", "1/2 AA : 1/2 aa (1:1)", "1/2 Aa : 1/2 aa (1:1)", "100% Aa (1)"],
+                answer: "1/4 AA : 2/4 Aa : 1/4 aa (1:2:1)",
+                explain: "Aa × Aa tạo ra 4 tổ hợp giao tử với tỉ lệ kiểu gen 1 AA : 2 Aa : 1 aa."
+            },
+            {
+                type: "Xuôi: P → Tỉ lệ kiểu hình F1",
+                q: "Phép lai P: Aa × aa cho đời con F1 có tỉ lệ kiểu hình là:",
+                options: ["1/2 Trội : 1/2 Lặn (1:1)", "3/4 Trội : 1/4 Lặn (3:1)", "100% Trội", "100% Lặn"],
+                answer: "1/2 Trội : 1/2 Lặn (1:1)",
+                explain: "Aa × aa là phép lai phân tích cá thể dị hợp, cho tỉ lệ kiểu hình 1 Trội : 1 Lặn."
+            },
+            {
+                type: "Ngược: Tỉ lệ kiểu hình F1 → P",
+                q: "Ở phép lai một tính trạng (trội hoàn toàn), đời con F1 thu được tỉ lệ kiểu hình 3 Trội : 1 Lặn. Kiểu gen của P là:",
+                options: ["Aa × Aa", "AA × Aa", "Aa × aa", "AA × aa"],
+                answer: "Aa × Aa",
+                explain: "Tỉ lệ kiểu hình phân tính 3 : 1 là dấu hiệu đặc trưng của phép lai dị hợp Aa × Aa."
+            },
+            {
+                type: "Xuôi: P → Tỉ lệ kiểu gen F1",
+                q: "Kết quả tỉ lệ kiểu gen ở F1 của phép lai P: AA × Aa là:",
+                options: ["1 AA : 1 Aa (1:1)", "100% AA (1)", "100% Aa (1)", "1 AA : 2 Aa : 1 aa"],
+                answer: "1 AA : 1 Aa (1:1)",
+                explain: "AA cho 1 loại giao tử A; Aa cho 2 loại giao tử A và a tỉ lệ 1:1 → F1: 1 AA : 1 Aa."
+            },
+            {
+                type: "Ngược: Tỉ lệ kiểu gen F1 → P",
+                q: "Nếu đời con F1 có tỉ lệ kiểu gen 1/2 Aa : 1/2 aa (1:1) thì phép lai P nào sau đây đã được thực hiện?",
+                options: ["Aa × aa", "AA × aa", "Aa × Aa", "aa × aa"],
+                answer: "Aa × aa",
+                explain: "Phép lai Aa × aa cho tỉ lệ kiểu gen 1 Aa : 1 aa."
+            },
+            {
+                type: "Tổng hợp: Nhóm Đồng tính trội",
+                q: "Có bao nhiêu phép lai trong bảng 6 phép lai cơ bản của Menđen cho đời con F1 đồng tính trội (100% Trội)?",
+                options: ["3 phép lai", "1 phép lai", "2 phép lai", "4 phép lai"],
+                answer: "3 phép lai",
+                explain: "Gồm 3 phép lai: AA × AA, AA × Aa và AA × aa đều cho 100% kiểu hình trội."
+            },
+            {
+                type: "Xuôi: P → Tỉ lệ kiểu hình F1",
+                q: "Phép lai P: AA × aa cho đời con F1 có kiểu hình như thế nào?",
+                options: ["100% Trội", "100% Lặn", "3 Trội : 1 Lặn", "1 Trội : 1 Lặn"],
+                answer: "100% Trội",
+                explain: "AA × aa → 100% Aa, vì A trội hoàn toàn so với a nên F1 biểu hiện 100% Trội."
+            },
+            {
+                type: "Ngược: Tỉ lệ kiểu hình F1 → P",
+                q: "Đời con F1 thu được 100% cá thể mang tính trạng lặn. Kiểu gen của bố mẹ (P) chắc chắn là:",
+                options: ["aa × aa", "Aa × aa", "Aa × Aa", "AA × aa"],
+                answer: "aa × aa",
+                explain: "Chỉ có phép lai aa × aa mới tạo ra 100% aa (Đồng tính lặn)."
+            },
+            {
+                type: "Xuôi: P → Tỉ lệ kiểu gen F1",
+                q: "Phép lai P: AA × aa cho tỉ lệ kiểu gen ở F1 là:",
+                options: ["100% Aa (1)", "100% AA (1)", "1 AA : 1 Aa", "1 Aa : 1 aa"],
+                answer: "100% Aa (1)",
+                explain: "Giao tử A kết hợp với giao tử a tạo ra 100% hợp tử dị hợp Aa."
+            },
+            {
+                type: "Ngược: Tỉ lệ kiểu gen F1 → P",
+                q: "F1 xuất hiện 3 loại kiểu gen với tỉ lệ 1/4 AA : 2/4 Aa : 1/4 aa. Phép lai P tương ứng là:",
+                options: ["Aa × Aa", "AA × Aa", "Aa × aa", "AA × AA"],
+                answer: "Aa × Aa",
+                explain: "Chỉ phép lai Aa × Aa mới tạo ra đủ 3 kiểu gen AA, Aa, aa theo tỉ lệ 1 : 2 : 1."
+            },
+            {
+                type: "So sánh phép lai",
+                q: "Phép lai nào sau đây có tỉ lệ kiểu gen F1 GIỐNG với tỉ lệ kiểu hình F1 (đều là 1 : 1)?",
+                options: ["Aa × aa", "AA × Aa", "Aa × Aa", "AA × aa"],
+                answer: "Aa × aa",
+                explain: "Ở phép lai Aa × aa, TLKG là 1 Aa : 1 aa và TLKH là 1 Trội : 1 Lặn (cùng tỉ lệ 1:1)."
+            },
+            {
+                type: "Nhận diện phép lai",
+                q: "Phép lai P: AA × AA cho kết quả F1 như thế nào?",
+                options: ["100% AA — 100% Trội", "100% Aa — 100% Trội", "1 AA : 1 Aa — 100% Trội", "100% aa — 100% Lặn"],
+                answer: "100% AA — 100% Trội",
+                explain: "AA × AA cho 100% kiểu gen AA và 100% kiểu hình trội."
+            }
+        ];
+
+        let quizQuestions = [];
+        let currentQuizIdx = 0;
+        let quizScore = 0;
+        let quizCorrect = 0;
+        let quizCombo = 0;
+        let quizMaxCombo = 0;
+        let quizAnswered = false;
+        let quizQuestionTimer = null;
+        let quizTimeLeft = 20;
+
+        function startQuizTimer() {
+            clearInterval(quizQuestionTimer);
+            quizTimeLeft = 20;
+            const timerEl = document.getElementById('quizTimeLeft');
+            const badgeEl = document.getElementById('quizTimerBadge');
+            if (timerEl) timerEl.textContent = quizTimeLeft;
+            if (badgeEl) {
+                badgeEl.className = "px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200";
+            }
+
+            quizQuestionTimer = setInterval(() => {
+                if (quizAnswered) {
+                    clearInterval(quizQuestionTimer);
+                    return;
+                }
+                quizTimeLeft--;
+                if (timerEl) timerEl.textContent = quizTimeLeft;
+
+                if (quizTimeLeft <= 5 && badgeEl) {
+                    badgeEl.className = "px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 border border-rose-300 animate-pulse";
+                }
+
+                if (quizTimeLeft <= 0) {
+                    clearInterval(quizQuestionTimer);
+                    handleQuizTimeout();
+                }
+            }, 1000);
+        }
+
+        function handleQuizTimeout() {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            playSoundEffect('wrong');
+            quizCombo = 0;
+
+            const item = quizQuestions[currentQuizIdx];
+            const allBtns = document.querySelectorAll('.quiz-opt-btn');
+            allBtns.forEach(b => {
+                b.disabled = true;
+                const textSpan = b.querySelector('span:last-child').textContent;
+                if (textSpan === item.answer) {
+                    b.classList.remove('border-emerald-200', 'bg-emerald-50/40');
+                    b.classList.add('border-emerald-600', 'bg-emerald-200', 'text-emerald-950');
+                }
+            });
+
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.remove('hidden');
+            feedbackBox.className = "mt-5 p-4 rounded-2xl border-2 border-amber-400 bg-amber-50 text-amber-950 text-sm font-bold";
+            feedbackBox.innerHTML = `⏰ <b>Hết giờ mất rồi!</b> Đáp án đúng là <b>${item.answer}</b>. <br><span class="font-semibold text-xs text-amber-800">💡 Giải thích: ${item.explain}</span>`;
+
+            speakRandomEncourage();
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('inline-flex');
+            nextBtn.querySelector('span:first-child').textContent =
+                currentQuizIdx === quizQuestions.length - 1 ? "Xem Bảng Vinh Danh" : "Câu tiếp theo";
+        }
+
+        function startQuiz() {
+            playSoundEffect('click');
+            clearInterval(quizQuestionTimer);
+            quizQuestions = shuffleArray(QUIZ_BANK);
+            currentQuizIdx = 0;
+            quizScore = 0;
+            quizCorrect = 0;
+            quizCombo = 0;
+            quizMaxCombo = 0;
+
+            document.getElementById('quizStartScreen').classList.add('hidden');
+            document.getElementById('quizResultScreen').classList.add('hidden');
+            document.getElementById('quizPlayScreen').classList.remove('hidden');
+
+            speakVietnamese(`Trận đấu tốc độ bắt đầu! Chúc ${studentName} thi đấu thật bùng nổ nhé!`, null, 'praise');
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            quizAnswered = false;
+            const item = quizQuestions[currentQuizIdx];
+            startQuizTimer();
+
+            document.getElementById('quizCurrentNum').textContent = currentQuizIdx + 1;
+            document.getElementById('quizScoreText').textContent = quizScore;
+            document.getElementById('quizProgressBar').style.width = `${((currentQuizIdx + 1) / quizQuestions.length) * 100}%`;
+
+            const comboBadge = document.getElementById('quizComboBadge');
+            if (quizCombo >= 2) {
+                comboBadge.classList.remove('hidden');
+                document.getElementById('quizComboCount').textContent = quizCombo;
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+
+            document.getElementById('quizQuestionType').textContent = item.type;
+            document.getElementById('quizQuestionText').textContent = item.q;
+
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.add('hidden');
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.classList.add('hidden');
+            nextBtn.classList.remove('inline-flex');
+
+            const optionsGrid = document.getElementById('quizOptionsGrid');
+            optionsGrid.innerHTML = '';
+
+            const shuffledOptions = shuffleArray(item.options);
+            const labels = ['A', 'B', 'C', 'D'];
+
+            shuffledOptions.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "quiz-opt-btn text-left p-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50/40 hover:bg-emerald-100/80 hover:border-emerald-400 font-extrabold text-emerald-950 transition flex items-center gap-3";
+                btn.innerHTML = `
+                    <span class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-black shrink-0 text-sm">${labels[idx]}</span>
+                    <span class="text-sm sm:text-base">${optText}</span>
+                `;
+                btn.onclick = () => handleQuizAnswer(optText, btn);
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        function handleQuizAnswer(selectedText, btnEl) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            clearInterval(quizQuestionTimer);
+
+            const item = quizQuestions[currentQuizIdx];
+            const isCorrect = selectedText === item.answer;
+            const allBtns = document.querySelectorAll('.quiz-opt-btn');
+
+            allBtns.forEach(b => {
+                b.disabled = true;
+                const textSpan = b.querySelector('span:last-child').textContent;
+                if (textSpan === item.answer) {
+                    b.classList.remove('border-emerald-200', 'bg-emerald-50/40');
+                    b.classList.add('border-emerald-600', 'bg-emerald-200', 'text-emerald-950');
+                }
+            });
+
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                playSoundEffect('correct');
+                quizCorrect++;
+                quizCombo++;
+                if (quizCombo > quizMaxCombo) quizMaxCombo = quizCombo;
+                const speedBonus = Math.max(0, quizTimeLeft * 2);
+                const comboBonus = (quizCombo - 1) * 20;
+                const gained = 100 + comboBonus + speedBonus;
+                quizScore += gained;
+
+                document.getElementById('quizScoreText').textContent = quizScore;
+                btnEl.classList.add('animate-pop');
+
+                feedbackBox.className = "mt-5 p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 text-emerald-900 text-sm font-bold animate-pop";
+                feedbackBox.innerHTML = `✅ <b>Chính xác! (+${gained} điểm)</b> — ${item.explain}`;
+                speakRandomPraise(quizCombo);
+            } else {
+                playSoundEffect('wrong');
+                quizCombo = 0;
+                btnEl.classList.remove('border-emerald-200', 'bg-emerald-50/40');
+                btnEl.classList.add('border-rose-500', 'bg-rose-100', 'text-rose-950', 'animate-shake');
+
+                feedbackBox.className = "mt-5 p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 text-rose-900 text-sm font-bold";
+                feedbackBox.innerHTML = `❌ <b>Chưa chính xác!</b> Đáp án đúng là <b>${item.answer}</b>. <br><span class="font-semibold text-xs text-rose-800">💡 Giải thích: ${item.explain}</span>`;
+                speakRandomEncourage();
+            }
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            nextBtn.classList.remove('hidden');
+            nextBtn.classList.add('inline-flex');
+            nextBtn.querySelector('span:first-child').textContent =
+                currentQuizIdx === quizQuestions.length - 1 ? "Xem Bảng Vinh Danh" : "Câu tiếp theo";
+        }
+
+        function nextQuizQuestion() {
+            playSoundEffect('click');
+            currentQuizIdx++;
+            if (currentQuizIdx < quizQuestions.length) {
+                renderQuizQuestion();
+            } else {
+                showQuizResults();
+            }
+        }
+
+        function showQuizResults() {
+            clearInterval(quizQuestionTimer);
+            document.getElementById('quizPlayScreen').classList.add('hidden');
+            document.getElementById('quizResultScreen').classList.remove('hidden');
+
+            document.getElementById('resultStudentMeta').textContent = `Học sinh: ${studentName} • Lớp: ${studentClass}`;
+            document.getElementById('resCorrectCount').textContent = `${quizCorrect}/12`;
+            document.getElementById('resTotalScore').textContent = quizScore;
+            document.getElementById('resMaxCombo').textContent = `x${quizMaxCombo}`;
+
+            let title = "";
+            let comment = "";
+            let trophy = "🏆";
+            let mood = "praise";
+
+            if (quizCorrect >= 10) {
+                trophy = quizCorrect === 12 ? "👑" : "🏆";
+                title = quizCorrect === 12 ? "HUYỀN THOẠI DI TRUYỀN HỌC!" : "XUẤT SẮC QUÁ EM ƠI!";
+                comment = getNextUniqueLine('summaryExcellent');
+                mood = "combo";
+                playSoundEffect('win');
+                triggerConfetti();
+            } else if (quizCorrect >= 7) {
+                trophy = "🌟";
+                title = "KHÁ GIỎI LẮM RỒI ĐÓ!";
+                comment = getNextUniqueLine('summaryGood');
+                mood = "praise";
+                playSoundEffect('correct');
+            } else {
+                trophy = "🌱";
+                title = "CỐ LÊN NHÀ KHOA HỌC NHÍ!";
+                comment = getNextUniqueLine('summaryEncourage');
+                mood = "encourage";
+                playSoundEffect('click');
+            }
+
+            document.getElementById('resultTrophyIcon').textContent = trophy;
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resComment').textContent = comment;
+
+            speakVietnamese(`${title} ${comment}`, comment, mood);
+        }
+
+        /* =========================================================================
+           8. HIỆU ỨNG PHÁO HOA CONFETTI
+           ========================================================================= */
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 90,
+                    spread: 75,
+                    origin: { y: 0.6 },
+                    colors: ['#10b981', '#f59e0b', '#0ea5e9', '#ec4899']
+                });
+            }
+        }
+
+        // Khởi tạo giao diện khi tải trang
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTab1();
+            loadVietnameseVoices();
+            setTimeout(loadVietnameseVoices, 400);
+        });
+    </script>
+</body>
+</html>
